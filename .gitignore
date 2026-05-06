@@ -1,0 +1,11 @@
+# Python 缓存文件
+__pycache__/
+*.pyc
+*.pyo
+
+# 数据库文件
+*.db
+
+# 临时文件
+*.log
+*.tmp
