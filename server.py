@@ -100,7 +100,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(json.dumps({
                         'success': False,
-                        'error': '需要登录才能使用乘法运算',
+                        'error': '需要登录才能使用乘法和除法运算',
                         'requireLogin': True
                     }).encode())
                     return

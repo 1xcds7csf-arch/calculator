@@ -92,6 +92,16 @@ class Database:
                     
                     conn.commit()
                     print("[INFO] 数据库表创建成功")
+                    
+                    # 添加新字段（如果表已存在）
+                    try:
+                        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)")
+                        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS birthday DATE")
+                        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10)")
+                        conn.commit()
+                        print("[INFO] 用户表字段更新成功")
+                    except Exception as e:
+                        print(f"更新用户表字段失败（可能已存在）: {e}")
         except Exception as e:
             print(f"创建表失败: {e}")
     

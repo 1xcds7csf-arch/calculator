@@ -40,12 +40,13 @@
             color: #00d9ff;
             font-size: 20px;
             margin: 0;
+            white-space: nowrap;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         .header-buttons {
@@ -58,7 +59,7 @@
         .logout-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         .vip-btn {
@@ -518,9 +519,7 @@
                 if (data.requireVip) {
                     // 需要VIP
                     showMessage('error', data.error);
-                    if (confirm('是否立即升级VIP？')) {
-                        upgradeVip();
-                    }
+                    upgradeVip();
                     return;
                 }
                 
