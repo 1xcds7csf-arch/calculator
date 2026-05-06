@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算记录查询</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f4c75 0%, #3282b8 50%, #bbe1fa 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats {
+            background: rgba(27, 38, 44, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #3282b8;
+            color: #fff;
+        }
+
+        .stats h3 {
+            color: #00d9ff;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: #0f4c75;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #bbe1fa;
+            margin-top: 5px;
+        }
+
+        .filter {
+            background: rgba(27, 38, 44, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #3282b8;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter input {
+            padding: 10px 15px;
+            border: 1px solid #3282b8;
+            border-radius: 8px;
+            background: #0f4c75;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .filter input::placeholder {
+            color: #bbe1fa;
+        }
+
+        .filter button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #00d9ff;
+            color: #0f4c75;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .filter button:hover {
+            filter: brightness(1.1);
+        }
+
+        .records {
+            background: rgba(27, 38, 44, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #3282b8;
+        }
+
+        .records h3 {
+            color: #00d9ff;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #3282b8;
+        }
+
+        th {
+            background: #0f4c75;
+            color: #00d9ff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(50, 130, 184, 0.2);
+        }
+
+        .operator {
+            color: #00d9ff;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #bbe1fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 计算记录查询</h1>
+        
+        <div class="nav">
+            <a href="/">返回计算器</a>
+            <a href="/history">刷新记录</a>
+        </div>
+
+        <div class="stats" id="stats">
+            <h3>📈 统计信息</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRecords">-</div>
+                    <div class="stat-label">总记录数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="addCount">-</div>
+                    <div class="stat-label">加法次数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="subCount">-</div>
+                    <div class="stat-label">减法次数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="mulCount">-</div>
+                    <div class="stat-label">乘法次数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="divCount">-</div>
+                    <div class="stat-label">除法次数</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter">
+            <div class="filter-row">
+                <input type="number" id="filterNum1" placeholder="第一个数字">
+                <input type="number" id="filterNum2" placeholder="第二个数字">
+                <button onclick="filterRecords()">🔍 查询</button>
+                <button onclick="loadRecords()">📋 显示全部</button>
+            </div>
+        </div>
+
+        <div class="records">
+            <h3>📝 计算记录</h3>
+            <div id="recordsContainer">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 运算符映射
+        const operatorMap = {
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            '/': '÷'
+        };
+
+        // 加载统计信息
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalRecords').textContent = data.data.total_records;
+                    
+                    // 初始化各运算符计数
+                    const counts = { '+': 0, '-': 0, '*': 0, '/': 0 };
+                    data.data.operator_stats.forEach(stat => {
+                        counts[stat.operator] = stat.count;
+                    });
+                    
+                    document.getElementById('addCount').textContent = counts['+'];
+                    document.getElementById('subCount').textContent = counts['-'];
+                    document.getElementById('mulCount').textContent = counts['*'];
+                    document.getElementById('divCount').textContent = counts['/'];
+                }
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        // 加载记录列表
+        async function loadRecords() {
+            document.getElementById('recordsContainer').innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                console.log('正在请求记录...');
+                const response = await fetch('/api/records?limit=100');
+                console.log('响应状态:', response.status);
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                if (data.success) {
+                    displayRecords(data.data);
+                } else {
+                    document.getElementById('recordsContainer').innerHTML = 
+                        '<div class="empty">加载失败: ' + (data.error || '未知错误') + '</div>';
+                }
+            } catch (error) {
+                console.error('加载记录失败:', error);
+                document.getElementById('recordsContainer').innerHTML = 
+                    '<div class="empty">加载失败: ' + error.message + '</div>';
+            }
+        }
+
+        // 筛选记录
+        async function filterRecords() {
+            const num1 = document.getElementById('filterNum1').value;
+            const num2 = document.getElementById('filterNum2').value;
+            
+            if (!num1 && !num2) {
+                loadRecords();
+                return;
+            }
+            
+            document.getElementById('recordsContainer').innerHTML = '<div class="loading">查询中...</div>';
+            
+            try {
+                let url = '/api/records?limit=100';
+                if (num1) url += `&num1=${num1}`;
+                if (num2) url += `&num2=${num2}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayRecords(data.data);
+                }
+            } catch (error) {
+                console.error('筛选失败:', error);
+            }
+        }
+
+        // 显示记录表格
+        function displayRecords(records) {
+            if (records.length === 0) {
+                document.getElementById('recordsContainer').innerHTML = 
+                    '<div class="empty">暂无计算记录</div>';
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>第一个数字</th>
+                            <th>运算符</th>
+                            <th>第二个数字</th>
+                            <th>结果</th>
+                            <th>计算时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            records.forEach((record, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${record.num1}</td>
+                        <td class="operator">${operatorMap[record.operator] || record.operator}</td>
+                        <td>${record.num2}</td>
+                        <td>${record.result}</td>
+                        <td>${record.calc_time}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('recordsContainer').innerHTML = html;
+        }
+
+        // 页面加载时获取数据
+        window.onload = function() {
+            loadStats();
+            loadRecords();
+        };
+    </script>
+</body>
+</html>

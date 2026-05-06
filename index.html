@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f4c75 0%, #3282b8 50%, #bbe1fa 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculator {
+            background: #1b262c;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(15, 76, 117, 0.4);
+            width: 300px;
+            border: 1px solid #3282b8;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header h2 {
+            color: #00d9ff;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .logout-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vip-btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #0f4c75;
+            font-weight: bold;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .vip-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+
+        .history-link {
+            color: #bbe1fa;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            background: rgba(50, 130, 184, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .history-link:hover {
+            background: rgba(50, 130, 184, 0.5);
+            color: #fff;
+        }
+
+        #usernameDisplay {
+            color: #fff;
+            font-weight: 500;
+            background: transparent;
+            padding: 8px 12px;
+        }
+
+        .display {
+            background: #0f4c75;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+            border: 2px solid #3282b8;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .display-history {
+            color: #bbe1fa;
+            font-size: 16px;
+            min-height: 24px;
+            word-break: break-all;
+        }
+
+        .display-current {
+            color: #fff;
+            font-size: 42px;
+            font-weight: 300;
+            min-height: 56px;
+            word-break: break-all;
+            text-shadow: 0 0 10px rgba(50, 130, 184, 0.5);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 18px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: 500;
+            min-width: 0;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-number {
+            background: #3282b8;
+            color: #fff;
+        }
+
+        .btn-operator {
+            background: #0f4c75;
+            color: #fff;
+            border: 1px solid #3282b8;
+        }
+
+        .btn-function {
+            background: #bbe1fa;
+            color: #0f4c75;
+        }
+
+        .btn-delete {
+            font-size: 14px;
+            padding: 18px 0;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        .btn-equal {
+            background: #00d9ff;
+            color: #0f4c75;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: #1b262c;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            border: 2px solid #3282b8;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content h3 {
+            color: #00d9ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #bbe1fa;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #3282b8;
+            border-radius: 8px;
+            background: #0f4c75;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #00d9ff;
+            color: #0f4c75;
+        }
+
+        .btn-secondary {
+            background: #3282b8;
+            color: #fff;
+        }
+
+        .btn-cancel {
+            background: #0f4c75;
+            color: #bbe1fa;
+            border: 1px solid #3282b8;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #0f4c75;
+            color: #bbe1fa;
+            border: 1px solid #3282b8;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .tab-btn.active {
+            background: #3282b8;
+            color: #fff;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(0, 217, 255, 0.2);
+            color: #00d9ff;
+            border: 1px solid #00d9ff;
+        }
+
+        .message.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h2>🧮 计算器</h2>
+            <div class="header-right">
+                <div class="header-buttons">
+                    <button id="upgradeVipBtn" class="vip-btn" onclick="upgradeVip()" style="display:none;">⭐ 升级VIP</button>
+                    <div class="logout-row">
+                        <span id="usernameDisplay" class="history-link" style="display:none;"></span>
+                        <button id="logoutBtn" class="history-link" onclick="logout()" style="display:none;">🚪 登出</button>
+                    </div>
+                </div>
+                <button id="loginBtn" class="history-link" onclick="showLoginModal()">👤 登录</button>
+            </div>
+        </div>
+        <div class="display">
+            <div class="display-history" id="history"></div>
+            <div class="display-current" id="display">0</div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-function" onclick="clearAll()">AC</button>
+            <button class="btn-function btn-delete" onclick="deleteLast()">Delete</button>
+            <button class="btn-function" onclick="toggleSign()">+/-</button>
+            <button class="btn-operator" onclick="appendOperator('/')">÷</button>
+
+            <button class="btn-number" onclick="appendNumber('7')">7</button>
+            <button class="btn-number" onclick="appendNumber('8')">8</button>
+            <button class="btn-number" onclick="appendNumber('9')">9</button>
+            <button class="btn-operator" onclick="appendOperator('*')">×</button>
+
+            <button class="btn-number" onclick="appendNumber('4')">4</button>
+            <button class="btn-number" onclick="appendNumber('5')">5</button>
+            <button class="btn-number" onclick="appendNumber('6')">6</button>
+            <button class="btn-operator" onclick="appendOperator('-')">−</button>
+
+            <button class="btn-number" onclick="appendNumber('1')">1</button>
+            <button class="btn-number" onclick="appendNumber('2')">2</button>
+            <button class="btn-number" onclick="appendNumber('3')">3</button>
+            <button class="btn-operator" onclick="appendOperator('+')">+</button>
+
+            <button class="btn-number btn-zero" onclick="appendNumber('0')">0</button>
+            <button class="btn-number" onclick="appendNumber('.')">.</button>
+            <button class="btn-equal" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <!-- 登录/注册模态框 -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h3>用户登录/注册</h3>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('login')">登录</button>
+                <button class="tab-btn" onclick="switchTab('register')">注册</button>
+            </div>
+            <div id="messageBox" class="message"></div>
+            
+            <!-- 登录表单 -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-primary" onclick="login()">登录</button>
+                    <button class="btn-cancel" onclick="closeModal()">取消</button>
+                </div>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="registerUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="registerPassword" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="confirmPassword" placeholder="请再次输入密码">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" onclick="register()">注册</button>
+                    <button class="btn-cancel" onclick="closeModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentValue = '0';
+        let previousValue = '';
+        let operator = '';
+        let shouldResetScreen = false;
+        let isLoggedIn = false;
+        let currentUsername = '';
+        let isVip = false;
+
+        const display = document.getElementById('display');
+        const history = document.getElementById('history');
+
+        function updateDisplay() {
+            display.textContent = currentValue;
+            if (previousValue && operator) {
+                history.textContent = `${previousValue} ${operator}`;
+            } else {
+                history.textContent = '';
+            }
+        }
+
+        function appendNumber(num) {
+            if (shouldResetScreen) {
+                currentValue = '';
+                shouldResetScreen = false;
+            }
+            // 限制只能输入两位数（不包括负号和小数点）
+            let numericPart = currentValue.replace('-', '').replace('.', '');
+            if (numericPart.length >= 2 && num !== '.') {
+                return; // 已达到两位数，禁止输入更多数字
+            }
+            if (num === '.' && currentValue.includes('.')) return;
+            if (currentValue === '0' && num !== '.') {
+                currentValue = num;
+            } else {
+                currentValue += num;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== '' && !shouldResetScreen) {
+                calculate();
+            }
+            previousValue = currentValue;
+            operator = op;
+            shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        async function calculate() {
+            if (operator === '' || previousValue === '') return;
+
+            const num1 = parseFloat(previousValue);
+            const num2 = parseFloat(currentValue);
+
+            // 调用后端API进行计算
+            try {
+                console.log('发送计算请求:', { num1, num2, operator });
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        num1: num1,
+                        num2: num2,
+                        operator: operator
+                    })
+                });
+                
+                console.log('收到响应:', response.status);
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                if (data.requireLogin) {
+                    // 需要登录
+                    showMessage('error', data.error);
+                    showLoginModal();
+                    return;
+                }
+                
+                if (data.requireVip) {
+                    // 需要VIP
+                    showMessage('error', data.error);
+                    if (confirm('是否立即升级VIP？')) {
+                        upgradeVip();
+                    }
+                    return;
+                }
+                
+                if (data.success) {
+                    currentValue = String(data.result);
+                    history.textContent = `${num1} ${operator} ${num2} =`;
+                    previousValue = '';
+                    operator = '';
+                    shouldResetScreen = true;
+                    updateDisplay();
+                } else {
+                    currentValue = data.error || '错误';
+                    previousValue = '';
+                    operator = '';
+                    shouldResetScreen = true;
+                    updateDisplay();
+                }
+            } catch (error) {
+                console.error('计算请求失败:', error);
+                currentValue = '错误:' + error.message;
+                previousValue = '';
+                operator = '';
+                shouldResetScreen = true;
+                updateDisplay();
+            }
+        }
+
+        function clearAll() {
+            currentValue = '0';
+            previousValue = '';
+            operator = '';
+            shouldResetScreen = false;
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentValue.length > 1) {
+                currentValue = currentValue.slice(0, -1);
+            } else {
+                currentValue = '0';
+            }
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentValue !== '0') {
+                currentValue = (parseFloat(currentValue) * -1).toString();
+                updateDisplay();
+            }
+        }
+
+        // 键盘支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '0' && e.key <= '9') {
+                // 限制只能输入两位数
+                let numericPart = currentValue.replace('-', '').replace('.', '');
+                if (numericPart.length < 2) {
+                    appendNumber(e.key);
+                }
+            }
+            if (e.key === '.') appendNumber('.');
+            if (e.key === '+') appendOperator('+');
+            if (e.key === '-') appendOperator('-');
+            if (e.key === '*') appendOperator('*');
+            if (e.key === '/') { e.preventDefault(); appendOperator('/'); }
+            if (e.key === 'Enter' || e.key === '=') calculate();
+            if (e.key === 'Escape') clearAll();
+            if (e.key === 'Backspace') deleteLast();
+        });
+
+        // 用户认证相关函数
+        function showLoginModal() {
+            document.getElementById('authModal').style.display = 'block';
+            hideMessage();
+        }
+
+        function closeModal() {
+            document.getElementById('authModal').style.display = 'none';
+            clearForms();
+        }
+
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'login') {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+            }
+            hideMessage();
+        }
+
+        function showMessage(type, message) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.className = `message ${type}`;
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        function hideMessage() {
+            document.getElementById('messageBox').style.display = 'none';
+        }
+
+        function clearForms() {
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            hideMessage();
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showMessage('error', '请输入用户名和密码');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    isLoggedIn = true;
+                    currentUsername = data.username;
+                    isVip = data.isVip || false;
+                    updateLoginUI();
+                    closeModal();
+                    showMessage('success', '登录成功！');
+                    setTimeout(() => hideMessage(), 2000);
+                } else {
+                    showMessage('error', data.error);
+                }
+            } catch (error) {
+                showMessage('error', '登录失败：' + error.message);
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!username || !password) {
+                showMessage('error', '请输入用户名和密码');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('error', '两次密码输入不一致');
+                return;
+            }
+
+            if (password.length < 3) {
+                showMessage('error', '密码长度至少3位');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', '注册成功！请登录');
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                        document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+                    }, 1500);
+                } else {
+                    showMessage('error', data.error);
+                }
+            } catch (error) {
+                showMessage('error', '注册失败：' + error.message);
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                isLoggedIn = false;
+                currentUsername = '';
+                isVip = false;
+                updateLoginUI();
+            } catch (error) {
+                console.error('登出失败:', error);
+            }
+        }
+
+        async function upgradeVip() {
+            if (!isLoggedIn) {
+                showMessage('error', '请先登录');
+                showLoginModal();
+                return;
+            }
+
+            if (isVip) {
+                showMessage('success', '您已经是VIP用户了！');
+                return;
+            }
+
+            if (!confirm('确定要升级为VIP用户吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/upgrade-vip', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    isVip = true;
+                    updateLoginUI();
+                    showMessage('success', '🎉 恭喜！升级VIP成功！现在可以使用除法运算了！');
+                    setTimeout(() => hideMessage(), 3000);
+                } else {
+                    showMessage('error', data.error);
+                }
+            } catch (error) {
+                showMessage('error', '升级失败：' + error.message);
+            }
+        }
+
+        function updateLoginUI() {
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const usernameDisplay = document.getElementById('usernameDisplay');
+            const upgradeVipBtn = document.getElementById('upgradeVipBtn');
+
+            if (isLoggedIn) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                usernameDisplay.style.display = 'inline-block';
+                
+                // 显示用户名和VIP标识
+                if (isVip) {
+                    usernameDisplay.textContent = `👑 ${currentUsername} [VIP]`;
+                    upgradeVipBtn.style.display = 'none';
+                } else {
+                    usernameDisplay.textContent = `👤 ${currentUsername}`;
+                    upgradeVipBtn.style.display = 'inline-block';
+                }
+            } else {
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+                usernameDisplay.style.display = 'none';
+                upgradeVipBtn.style.display = 'none';
+            }
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('authModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
