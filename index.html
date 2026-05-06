@@ -403,6 +403,35 @@
         </div>
     </div>
 
+    <!-- VIP注册模态框 -->
+    <div id="vipModal" class="modal">
+        <div class="modal-content">
+            <h3>注册VIP会员</h3>
+            <div id="vipMessageBox" class="message"></div>
+            <div class="form-group">
+                <label>手机号</label>
+                <input type="tel" id="vipPhone" placeholder="请输入手机号" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label>生日</label>
+                <input type="date" id="vipBirthday">
+            </div>
+            <div class="form-group">
+                <label>性别</label>
+                <select id="vipGender" style="width: 100%; padding: 10px; border: 1px solid #3282b8; border-radius: 8px; background: #0f4c75; color: #fff; font-size: 16px;">
+                    <option value="">请选择性别</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="submitVipRegistration()">提交注册</button>
+                <button class="btn-cancel" onclick="closeVipModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentValue = '0';
         let previousValue = '';
@@ -719,14 +748,60 @@
                 return;
             }
 
-            if (!confirm('确定要升级为VIP用户吗？')) {
+            document.getElementById('vipModal').style.display = 'block';
+            hideVipMessage();
+        }
+
+        function closeVipModal() {
+            document.getElementById('vipModal').style.display = 'none';
+            clearVipForm();
+        }
+
+        function clearVipForm() {
+            document.getElementById('vipPhone').value = '';
+            document.getElementById('vipBirthday').value = '';
+            document.getElementById('vipGender').value = '';
+            hideVipMessage();
+        }
+
+        function showVipMessage(type, message) {
+            const messageBox = document.getElementById('vipMessageBox');
+            messageBox.className = `message ${type}`;
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        function hideVipMessage() {
+            document.getElementById('vipMessageBox').style.display = 'none';
+        }
+
+        async function submitVipRegistration() {
+            const phone = document.getElementById('vipPhone').value.trim();
+            const birthday = document.getElementById('vipBirthday').value;
+            const gender = document.getElementById('vipGender').value;
+
+            if (!phone || !birthday || !gender) {
+                showVipMessage('error', '请填写完整的注册信息');
+                return;
+            }
+
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                showVipMessage('error', '请输入有效的手机号');
                 return;
             }
 
             try {
                 const response = await fetch('/api/upgrade-vip', {
                     method: 'POST',
-                    credentials: 'include'
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        phone: phone,
+                        birthday: birthday,
+                        gender: gender
+                    })
                 });
 
                 const data = await response.json();
@@ -734,13 +809,15 @@
                 if (data.success) {
                     isVip = true;
                     updateLoginUI();
-                    showMessage('success', '🎉 恭喜！升级VIP成功！现在可以使用除法运算了！');
-                    setTimeout(() => hideMessage(), 3000);
+                    showVipMessage('success', '恭喜！升级VIP成功！现在可以使用除法运算了！');
+                    setTimeout(() => {
+                        closeVipModal();
+                    }, 2000);
                 } else {
-                    showMessage('error', data.error);
+                    showVipMessage('error', data.error);
                 }
             } catch (error) {
-                showMessage('error', '升级失败：' + error.message);
+                showVipMessage('error', '升级失败：' + error.message);
             }
         }
 
@@ -773,9 +850,13 @@
 
         // 点击模态框外部关闭
         window.onclick = function(event) {
-            const modal = document.getElementById('authModal');
-            if (event.target === modal) {
+            const authModal = document.getElementById('authModal');
+            const vipModal = document.getElementById('vipModal');
+            if (event.target === authModal) {
                 closeModal();
+            }
+            if (event.target === vipModal) {
+                closeVipModal();
             }
         }
     </script>

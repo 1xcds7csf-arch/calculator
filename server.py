@@ -419,7 +419,6 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def _handle_upgrade_vip(self):
         """处理VIP升级"""
         try:
-            # 从 Cookie 获取会话 ID
             cookies = self.headers.get('Cookie', '')
             session_id = None
             for cookie in cookies.split(';'):
@@ -437,14 +436,30 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 }).encode())
                 return
             
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            phone = data.get('phone')
+            birthday = data.get('birthday')
+            gender = data.get('gender')
+            
+            if not phone or not birthday or not gender:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': '请填写完整的注册信息'
+                }).encode())
+                return
+            
             user_session = active_sessions[session_id]
             user_id = user_session['user_id']
             
-            # 升级VIP
-            success = db.upgrade_to_vip(user_id)
+            success = db.upgrade_to_vip(user_id, phone, birthday, gender)
             
             if success:
-                # 更新会话信息
                 active_sessions[session_id]['is_vip'] = True
                 
                 self.send_response(200)

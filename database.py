@@ -82,6 +82,9 @@ class Database:
                         username VARCHAR(50) NOT NULL UNIQUE,
                         password VARCHAR(100) NOT NULL,
                         is_vip TINYINT(1) DEFAULT 0,
+                        phone VARCHAR(20),
+                        birthday DATE,
+                        gender VARCHAR(10),
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                     """
@@ -262,15 +265,15 @@ class Database:
             print(f"验证用户失败: {e}")
             return None
     
-    def upgrade_to_vip(self, user_id):
+    def upgrade_to_vip(self, user_id, phone=None, birthday=None, gender=None):
         """升级用户为VIP"""
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     sql = """
-                    UPDATE users SET is_vip = 1 WHERE id = %s
+                    UPDATE users SET is_vip = 1, phone = %s, birthday = %s, gender = %s WHERE id = %s
                     """
-                    cursor.execute(sql, (user_id,))
+                    cursor.execute(sql, (phone, birthday, gender, user_id))
                     conn.commit()
                     return True
         except Exception as e:
