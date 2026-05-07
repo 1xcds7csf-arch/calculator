@@ -443,6 +443,8 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             phone = data.get('phone')
             birthday = data.get('birthday')
             gender = data.get('gender')
+            email = data.get('email')
+            membership_type = data.get('membership_type', 'standard')
             
             if not phone or not birthday or not gender:
                 self.send_response(400)
@@ -457,7 +459,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             user_session = active_sessions[session_id]
             user_id = user_session['user_id']
             
-            success = db.upgrade_to_vip(user_id, phone, birthday, gender)
+            success = db.upgrade_to_vip(user_id, phone, birthday, gender, email, membership_type)
             
             if success:
                 active_sessions[session_id]['is_vip'] = True

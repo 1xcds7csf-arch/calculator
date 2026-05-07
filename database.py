@@ -85,6 +85,8 @@ class Database:
                         phone VARCHAR(20),
                         birthday DATE,
                         gender VARCHAR(10),
+                        email VARCHAR(100),
+                        membership_type VARCHAR(20) DEFAULT 'standard',
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                     """
@@ -98,6 +100,8 @@ class Database:
                         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)")
                         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS birthday DATE")
                         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10)")
+                        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100)")
+                        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_type VARCHAR(20) DEFAULT 'standard'")
                         conn.commit()
                         print("[INFO] 用户表字段更新成功")
                     except Exception as e:
@@ -275,15 +279,15 @@ class Database:
             print(f"验证用户失败: {e}")
             return None
     
-    def upgrade_to_vip(self, user_id, phone=None, birthday=None, gender=None):
+    def upgrade_to_vip(self, user_id, phone=None, birthday=None, gender=None, email=None, membership_type='standard'):
         """升级用户为VIP"""
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     sql = """
-                    UPDATE users SET is_vip = 1, phone = %s, birthday = %s, gender = %s WHERE id = %s
+                    UPDATE users SET is_vip = 1, phone = %s, birthday = %s, gender = %s, email = %s, membership_type = %s WHERE id = %s
                     """
-                    cursor.execute(sql, (phone, birthday, gender, user_id))
+                    cursor.execute(sql, (phone, birthday, gender, email, membership_type, user_id))
                     conn.commit()
                     return True
         except Exception as e:
